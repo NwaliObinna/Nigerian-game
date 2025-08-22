@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BBNaija Quiz Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    .hidden { display: none; }
+    .question { font-size: 18px; margin-bottom: 10px; }
+    .options button { display: block; margin: 5px 0; padding: 10px; width: 100%; }
+    .timer { font-weight: bold; color: red; }
+    .leaderboard { margin-top: 20px; }
+    .segment-title { font-size: 20px; margin-top: 20px; }
+    #startBtn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>BBNaija Quiz Game</h2>
+    <button id="startBtn">Start Quiz</button>
+    
+    <div id="quizContainer" class="hidden">
+      <div id="segmentTitle" class="segment-title"></div>
+      <p class="question" id="questionText"></p>
+      <div class="options" id="optionsContainer"></div>
+      <p class="timer">Time left: <span id="timer">20</span>s</p>
+      <div class="leaderboard">
+        <h3>Leaderboard</h3>
+        <p>Your Score: <span id="score">0</span> / 20</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      { question: "Who won BBNaija Season 4?", options: ["Mercy Eke", "Tacha", "Mike", "Frodd"], answer: "Mercy Eke" },
+      { question: "Which housemate won Season 5?", options: ["Neo", "Laycon", "Kiddwaya", "Ozo"], answer: "Laycon" },
+      { question: "Who was disqualified in Season 4?", options: ["Tacha", "Venita", "Diane", "Esther"], answer: "Tacha" },
+      { question: "Who won Season 6?", options: ["Liquorose", "WhiteMoney", "Pere", "Cross"], answer: "WhiteMoney" },
+      { question: "Who won Season 7?", options: ["Bella", "Phyna", "Chichi", "Daniella"], answer: "Phyna" },
+      { question: "Who was first evicted in Season 10?", options: ["Ibifubara", "Danboskid", "Rooboy", "Zita"], answer: "Danboskid" },
+      { question: "Who left due to medical reasons?", options: ["Sabrina", "Tracy", "Kuture", "Bright Morgan"], answer: "Sabrina" },
+      { question: "Who was saved by Tracy in Week 3?", options: ["Mensan", "Faith", "Kuture", "Rooboy"], answer: "Kuture" },
+      { question: "Who found the immunity card?", options: ["Otega", "Jason Jae", "Zita", "Danboskid"], answer: "Otega" },
+      { question: "Who was 'Most Influential' in Week 3?", options: ["Rooboy", "Faith", "Mensan", "Victory"], answer: "Rooboy" },
+      { question: "Who was the first housemate evicted in BBNaija Season 10?", options: ["Ibifubara", "Danboskid", "Rooboy", "Zita"], answer: "Danboskid" },
+      { question: "Which housemate was evicted alongside Danboskid in Week 2?", options: ["Faith", "Ibifubara", "Mensan", "Jason Jae"], answer: "Ibifubara" },
+      { question: "Which housemate left BBNaija Season 10 due to medical reasons?", options: ["Sabrina", "Tracy", "Kuture", "Bright Morgan"], answer: "Sabrina" },
+      { question: "Who was saved from eviction in Week 3 by Head of House Tracy?", options: ["Mensan", "Faith", "Kuture", "Rooboy"], answer: "Kuture" },
+  { question: "Which housemate earned immunity in Week 3 by finding a hidden card?", options: ["Otega", "Jason Jae", "Zita", "Danboskid"], answer: "Otega" },
+  { question: "Which housemate was crowned 'Most Influential' and saved from eviction in Week 3?", options: ["Rooboy", "Faith", "Mensan", "Victory"], answer: "Rooboy" },
+  { question: "Who was saved from eviction in Week 4 by Head of House Zita?", options: ["Faith and Mensan", "Jason Jae and Rooboy", "Kuture and Tracy", "Otega and Sabrina"], answer: "Faith and Mensan" },
+  { question: "Which housemate was immune from eviction in Week 4 due to being Head of House?", options: ["Zita", "Victory", "Tracy", "Jason Jae"], answer: "Zita" },
+  { question: "Which housemate was saved from eviction in Week 4 for being 'Most Influential'?", options: ["Jason Jae", "Rooboy", "Otega", "Faith"], answer: "Jason Jae" },
+  { question: "Which housemate narrowly escaped eviction in Week 2 after falling into the bottom three?", options: ["Denari", "Ibifubara", "Danboskid", "Zita"], answer: "Denari" },
+  { question: "Which housemate was saved by Head of House Victory in Week 1?", options: ["Kayikunmi", "Rooboy", "Faith", "Mensan"], answer: "Kayikunmi" },
+  { question: "How many housemates faced eviction in Week 1 of BBNaija Season 10?", options: ["27", "20", "22", "24"], answer: "27" },
+  { question: "Which housemates failed to find the immunity envelope in Week 1?", options: ["Zita, Danboskid, Rooboy", "Faith, Jason Jae, Tracy", "Otega, Sabrina, Kuture", "Victory, Kayikunmi, Denari"], answer: "Zita, Danboskid, Rooboy" },
+  { question: "Which housemate was not allowed to save Rooboy despite being Head of House?", options: ["Zita", "Tracy", "Victory", "Mensan"], answer: "Zita" },
+  { question: "Which housemate was tagged 'House Snail' due to poor HOH performance?", options: ["Rooboy", "Danboskid", "Jason Jae", "Otega"], answer: "Rooboy" },
+  { question: "Which housemate was disqualified from saving campaigners in Week 4?", options: ["Zita", "Tracy", "Victory", "Faith"], answer: "Zita" },
+  { question: "Which housemate expressed interest in launching a podcast after eviction?", options: ["Ibifubara", "Danboskid", "Zita", "Otega"], answer: "Ibifubara" },
+  { question: "Which housemate planned to pursue a Nollywood career after eviction?", options: ["Danboskid", "Jason Jae", "Rooboy", "Victory"], answer: "Danboskid" },
+  { question: "Which housemate was saved from eviction in Week 2 by winning a challenge?", options: ["Otega", "Faith", "Mensan", "Jason Jae"], answer: "Otega" },
+  { question: "Which housemate was saved in Week 1 by Head of House Victory?", options: ["Kayikunmi", "Tracy", "Zita", "Rooboy"], answer: "Kayikunmi" }
+]
+    let selectedQuestions = [];
+    let segments = [];
+    let currentSegment = 0;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timerInterval;
+    let timeLeft = 20;
+
+    const startBtn = document.getElementById("startBtn");
+    const quizContainer = document.getElementById("quizContainer");
+    const questionText = document.getElementById("questionText");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const timerDisplay = document.getElementById("timer");
+    const scoreDisplay = document.getElementById("score");
+    const segmentTitle = document.getElementById("segmentTitle");
+
+    startBtn.addEventListener("click", () => {
+      startBtn.classList.add("hidden");
+      quizContainer.classList.remove("hidden");
+      startGame();
+    });
+
+    function startGame() {
+      selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 20);
+      segments = [selectedQuestions.slice(0, 10), selectedQuestions.slice(10)];
+      currentSegment = 0;
+      currentQuestionIndex = 0;
+      score = 0;
+      scoreDisplay.textContent = score;
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      clearInterval(timerInterval);
+      timeLeft = 20;
+      timerDisplay.textContent = timeLeft;
+
+      if (currentQuestionIndex >= segments[currentSegment].length) {
+        currentSegment++;
+        currentQuestionIndex = 0;
+        if (currentSegment >= segments.length) {
+          questionText.textContent = "🎉 Quiz Complete!";
+          optionsContainer.innerHTML = "";
+          segmentTitle.textContent = "";
+          return;
+        }
+      }
+
+      segmentTitle.textContent = `Segment ${currentSegment + 1}`;
+      const q = segments[currentSegment][currentQuestionIndex];
+      questionText.textContent = q.question;
+      optionsContainer.innerHTML = "";
+
+      q.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(option, q.answer);
+        optionsContainer.appendChild(btn);
+      });
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          currentQuestionIndex++;
+          loadQuestion();
+        }
+      }, 1000);
+    }
+
+    function checkAnswer(selected, correct) {
+      clearInterval(timerInterval);
+      if (selected === correct) score++;
+      scoreDisplay.textContent = score;
+      currentQuestionIndex++;
+      loadQuestion();
+    }
+  </script>
+</body>
+</html>
